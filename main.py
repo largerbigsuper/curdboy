@@ -1,14 +1,23 @@
 
 import uvicorn
 from fastapi import FastAPI
-from routers import curdboy_router
-from apps.users import models
-from database.db import engine
+from fastapi.middleware.cors import CORSMiddleware
 
-models.Base.metadata.create_all(bind=engine)
+from database.db import Base, engine
+from routers import curdboy_router
+from settings.config import settings
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.APP_ALLOW_ORIGINS,
+    allow_credentials=True,
+    allow_methods=settings.APP_ALLOW_METHODS,
+    allow_headers=["*"],
 
+)
 
 app.include_router(curdboy_router, prefix="/api")
 

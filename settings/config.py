@@ -1,6 +1,6 @@
 import os
+from typing import List
 from pydantic import BaseSettings
-
 
 class CURDBOYSettings(BaseSettings):
     DB_USER: str
@@ -8,6 +8,9 @@ class CURDBOYSettings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
+    APP_OPENAPI_URL: str = "/docs"
+    APP_ALLOW_ORIGINS: List[str] = ["http://localhost", "http://localhost:8000"]
+    APP_ALLOW_METHODS: List[str] = ["get", "post", "update", "delete"]
     
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> str:
