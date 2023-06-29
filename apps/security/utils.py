@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from apps.auth import service as auth_service
+from apps.security.schemas import UserPassword, UserPasswordReset
 from database.db import get_db
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -50,12 +51,19 @@ def authenticate_user(db: Session, username: str, password: str):
     return user
 
 
-def signup_user(db: Session, user: User):
+def user_signup(db: Session, user: User):
     db_user = auth_service.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="username already registered")
     user.password = get_password_hash(user.password)
     return auth_service.create_user(db=db, user=user)
+
+
+def user_password_change(db: Session, username: str, password: str):
+    db_user = auth_service.get_user_by_username(db, username=username)
+    new_spassword = get_password_hash(password)
+    updates = UserPassword(password=new_spassword)
+    return auth_service.update_user(db=db, db_user=db_user, updates=updates)
  
 
 def create_access_token(data: dict, expires_delta: timedelta  = None):
@@ -95,3 +103,17 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
     return current_user
 
 
+
+# class PermissionChecker:
+
+#     def __init__(self, required_permissions: list[str]) -> None:
+#         self.required_permissions = required_permissions
+
+#     def __call__(self, user: User = Depends(get_current_user)) -> bool:
+#         for r_perm in self.required_permissions:
+#             if r_perm not in user.permissions:
+#                 raise HTTPException(
+#                     status_code=status.HTTP_401_UNAUTHORIZED,
+#                     detail='Permissions'
+#                 )
+#         return True

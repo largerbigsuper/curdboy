@@ -25,6 +25,7 @@ class User(BaseModel):
     gender: Optional[str]
     avatar: Optional[str]
     email: Optional[str]
+    password: Optional[str]
     is_superuser: bool
     is_active: bool
     created_time: datetime
